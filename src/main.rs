@@ -4,6 +4,9 @@ use axum::{response::IntoResponse, routing::get, Router, Server};
 
 #[tokio::main]
 async fn main() {
+    // Check we have set a message
+    env::var("MESSAGE").expect("MESSAGE env variable not set!");
+
     let app = Router::new().route("/", get(get_root));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
@@ -31,11 +34,6 @@ async fn main() {
 
 async fn get_root() -> impl IntoResponse {
     let mut writer = BufWriter::new(Vec::new());
-    ferris_says::say(
-        &env::var("MESSAGE").expect("MESSAGE env variable not set!"),
-        100,
-        &mut writer,
-    )
-    .unwrap();
+    ferris_says::say(&env::var("MESSAGE").unwrap(), 100, &mut writer).unwrap();
     String::from_utf8(writer.into_inner().unwrap()).unwrap()
 }
